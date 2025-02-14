@@ -22,9 +22,7 @@
 				"FLASK_ENV": "development"
 			},
 			"args": [
-				"run",
-				"--no-debugger",
-				"--no-reload"
+				"run"
 			],
 			"jinja": true,
 			"autoStartBrowser": false
