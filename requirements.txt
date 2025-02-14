@@ -1,0 +1,8 @@
+Flask
+Authlib
+flask-sqlalchemy
+flask-migrate
+pyodbc
+python-dotenv
+pytds
+sqlalchemy
