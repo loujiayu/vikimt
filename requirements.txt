@@ -5,3 +5,4 @@ flask-migrate
 pyodbc
 python-dotenv
 sqlalchemy
+requests
