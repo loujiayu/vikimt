@@ -28,7 +28,7 @@ def create_app():
 
 	# Register blueprints
 	from app.google_auth import google_auth
-	app.register_blueprint(google_auth, url_prefix="/google")
+	app.register_blueprint(google_auth)
 	
 	# with app.app_context():
 	# 	try:
