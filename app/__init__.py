@@ -31,6 +31,6 @@ def create_app():
 
 	# Register blueprints
 	from app.google_auth import google_auth
-	app.register_blueprint(google_auth)
+	app.register_blueprint(google_auth, url_prefix="google")
 	
 	return app
