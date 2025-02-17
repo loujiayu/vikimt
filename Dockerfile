@@ -1,4 +1,4 @@
-FROM gcr.io/google-appengine/python
+FROM python:3.10
 
 # Install system dependencies
 RUN apt-get update && apt-get install -y unixodbc unixodbc-dev && rm -rf /var/lib/apt/lists/*
