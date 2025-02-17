@@ -8,5 +8,4 @@ COPY . /app
 WORKDIR /app
 RUN pip install -r requirements.txt
 
-ENV PORT=8080
-CMD ["gunicorn", "-b", ":$PORT", "main:app"]
+CMD ["gunicorn", "-b", ":8080", "main:app"]
