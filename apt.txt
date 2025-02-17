@@ -1,2 +1,0 @@
-libodbc2
-unixodbc
