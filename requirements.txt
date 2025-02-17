@@ -6,3 +6,4 @@ pyodbc
 python-dotenv
 sqlalchemy
 requests
+gunicorn
