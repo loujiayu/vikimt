@@ -4,7 +4,7 @@ class Config:
 	SECRET_KEY = os.getenv("FLASK_SECRET_KEY", "supersecret") 
 
 	if os.getenv("DB_SERVER") == "127.0.0.1,1433":
-		print("🔹 Using Cloud SQL Proxy for local development.") 
+		print("🔹 Using Cloud SQL Proxy for local development.")  
 
 	# SQL Server Configuration
 	DB_SERVER = os.getenv("DB_SERVER", "127.0.0.1,1433")
