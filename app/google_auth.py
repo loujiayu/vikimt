@@ -8,6 +8,7 @@ google_auth = Blueprint("google_auth", __name__)
 
 @google_auth.route("/")
 def home():
+	user = Patient.query.filter_by(sso_user_id="773").first()
 	user = session.get("user")
 	if user:
 		return jsonify(user)
@@ -33,22 +34,22 @@ def authorize():
 	email = user_info.get("email")
 	name = user_info.get("name")
 
-	user = Patient.query.filter_by(SSOUserID=google_id).first()
+	user = Patient.query.filter_by(sso_user_id=google_id).first()
 
 	if not user:
-		existing_user = Patient.query.filter_by(Email=email).first()
+		existing_user = Patient.query.filter_by(email=email).first()
 
 		if existing_user:
-			existing_user.SSOProvider = "Google"
-			existing_user.SSOUserID = google_id
+			existing_user.sso_provider = "Google"
+			existing_user.sso_user_id = google_id
 			db.session.commit()
 			user = existing_user
 		else:
-			user = Patient(Email=email, FullName=name, SSOProvider="Google", SSOUserID=google_id)
+			user = Patient(email=email, full_name=name, sso_provider="Google", sso_user_id=google_id)
 			db.session.add(user)
 			db.session.commit()
 
-	session["user"] = {"id": user.AccountID, "name": user.FullName, "email": user.Email}
+	session["user"] = {"id": user.patient_id, "name": user.full_name, "email": user.email}
 	
 	return 'successful'
 	# return redirect(url_for("google_auth.home"))
