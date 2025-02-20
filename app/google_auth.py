@@ -1,6 +1,7 @@
 from flask import Blueprint, redirect, url_for, session, jsonify
 from app import db
-from app.models import Patient
+from app.models.patient import Patient
+from flask_login import login_user, logout_user, login_required, current_user
 from app.oauth import google
 import secrets
 
@@ -8,8 +9,8 @@ google_auth = Blueprint("google_auth", __name__)
 
 @google_auth.route("/")
 def home():
-	user = Patient.query.filter_by(sso_user_id="773").first()
-	user = session.get("user")
+	# user = Patient.query.filter_by(sso_user_id="773").first()
+	user = current_user.get_id()
 	if user:
 		return jsonify(user)
 	return '<a href="/google/login">Login with Google2</a>'
@@ -49,12 +50,13 @@ def authorize():
 			db.session.add(user)
 			db.session.commit()
 
-	session["user"] = {"id": user.patient_id, "name": user.full_name, "email": user.email}
+	login_user(user)
 	
 	return 'successful'
-	# return redirect(url_for("google_auth.home"))
 
 @google_auth.route("/logout")
+@login_required
 def logout():
-	session.pop("user", None)
+	# session.pop("user", None)
+	logout_user()
 	return redirect(url_for("google_auth.home"))

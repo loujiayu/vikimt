@@ -8,3 +8,6 @@ sqlalchemy
 requests
 gunicorn
 psycopg2
+google-cloud-storage
+Flask-RESTful
+Flask-Login
