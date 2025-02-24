@@ -3,6 +3,7 @@ from flask_login import login_user, logout_user, login_required
 from flask import jsonify, request
 from google import genai
 from google.genai import types
+import logging
 
 client = genai.Client(
 		vertexai=True,
@@ -56,11 +57,13 @@ class ChatAPI(Resource):
 
 			# # Generate response from Gemini AI
 			response_text = ""
+			logging.info("start generate_content_stream")
 			for chunk in client.models.generate_content_stream(
 					model=model_name,
 					contents=contents,
 					config=generate_content_config,
 			):
+				logging.info(chunk.text)
 				response_text += chunk.text
 
 			return jsonify({"response": response_text})
