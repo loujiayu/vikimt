@@ -34,7 +34,7 @@ def create_app():
 	
 	if app.config.get("FLASK_ENV") == "development":
 		logging.info("Running in development mode")
-		os.getenv("GOOGLE_APPLICATION_CREDENTIALS") = "./viki-419417-677fe76ddb4a.json"
+		# os.environ("GOOGLE_APPLICATION_CREDENTIALS") = "./viki-419417-677fe76ddb4a.json"
 
 	logging.info(app.config.get("SQLALCHEMY_DATABASE_URI"))
 	# Initialize extensions
