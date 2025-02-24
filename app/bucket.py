@@ -9,7 +9,7 @@ GCS_BUCKET_NAME = "patientstorage"
 
 def get_chat_history_from_gcs(patient_id):
 		bucket = client.get_bucket(GCS_BUCKET_NAME)
-		blob_name = f"{patient_id}.json"
+		blob_name = f"{patient_id}/patient"
 		blob = bucket.blob(blob_name)
 
 		if not blob.exists():

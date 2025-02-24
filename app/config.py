@@ -6,6 +6,7 @@ class Config:
 	if os.getenv("DB_SERVER") == "127.0.0.1":
 		print("🔹 Using Cloud SQL Proxy for local development.")  
 
+	FLASK_ENV = os.getenv("FLASK_ENV", "production")
 	# SQL Server Configuration
 	DB_SERVER = os.getenv("DB_SERVER", "127.0.0.1")
 	DB_NAME = os.getenv("DB_NAME")
@@ -14,8 +15,10 @@ class Config:
 	DB_PASSWORD = os.getenv("DB_PASSWORD") 
 	INSTANCE_CONNECTION_NAME=os.getenv("INSTANCE_UNIX_SOCKET") 
 
-	# SQLALCHEMY_DATABASE_URI = f"postgresql://{DB_USER}:{DB_PASSWORD}@{DB_SERVER}:{DB_PORT}/{DB_NAME}"
-	SQLALCHEMY_DATABASE_URI = f"postgresql://{DB_USER}:{DB_PASSWORD}@/{DB_NAME}?host=/cloudsql/{INSTANCE_CONNECTION_NAME}"
+	if FLASK_ENV == "development":
+		SQLALCHEMY_DATABASE_URI = f"postgresql://{DB_USER}:{DB_PASSWORD}@{DB_SERVER}:{DB_PORT}/{DB_NAME}"
+	else:
+		SQLALCHEMY_DATABASE_URI = f"postgresql://{DB_USER}:{DB_PASSWORD}@/{DB_NAME}?host=/cloudsql/{INSTANCE_CONNECTION_NAME}"
 	# SQLALCHEMY_DATABASE_URI = f"mssql+pyodbc://{DB_USER}:{DB_PASSWORD}@{DB_SERVER}/{DB_NAME}?driver=ODBC+Driver+17+for+SQL+Server"
 	SQLALCHEMY_TRACK_MODIFICATIONS = False
 

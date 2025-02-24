@@ -4,6 +4,7 @@ from flask_migrate import Migrate
 from flask_restful import Api
 from flask_login import LoginManager
 from dotenv import load_dotenv
+from flask_cors import CORS
 import logging
 
 db = SQLAlchemy()
@@ -18,10 +19,13 @@ def create_app():
 	load_dotenv()
 
 	app = Flask(__name__)
+	CORS(app)
 	
 	from app.bucket import ChatHistoryResource
+	from app.chat import ChatAPI
 	api = Api(app)
 	api.add_resource(ChatHistoryResource, '/chathistory/<int:patient_id>')
+	api.add_resource(ChatAPI, "/chat/<int:patient_id>")
 
 	# Load configuration
 	from app.config import Config
