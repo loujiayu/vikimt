@@ -56,7 +56,7 @@ class ChatAPI(Resource):
 
 			# # Generate response from Gemini AI
 			response_text = ""
-			for chunk in client.generate_content_stream(
+			for chunk in client.models.generate_content_stream(
 					model=model_name,
 					contents=contents,
 					config=generate_content_config,
