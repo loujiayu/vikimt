@@ -22,11 +22,14 @@ def create_app():
 	app = Flask(__name__)
 	CORS(app)
 	
-	from app.bucket import ChatHistoryResource
-	from app.chat import ChatAPI
+	from app.resources.bucket import ChatHistoryResource
+	from app.resources.chat import ChatAPI
+	from app.resources.prompt import PromptResource  # Import PromptResource
+	
 	api = Api(app)
 	api.add_resource(ChatHistoryResource, '/chathistory/<int:patient_id>')
 	api.add_resource(ChatAPI, "/chat/<int:patient_id>")
+	api.add_resource(PromptResource, '/prompt/<int:user_id>')  # Update PromptResource
 
 	# Load configuration
 	from app.config import Config
