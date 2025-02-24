@@ -6,6 +6,7 @@ from flask_login import LoginManager
 from dotenv import load_dotenv
 from flask_cors import CORS
 import logging
+import os
 
 db = SQLAlchemy()
 migrate = Migrate()
@@ -30,6 +31,10 @@ def create_app():
 	# Load configuration
 	from app.config import Config
 	app.config.from_object(Config)
+	
+	if app.config.get("FLASK_ENV") == "development":
+		logging.info("Running in development mode")
+		os.getenv("GOOGLE_APPLICATION_CREDENTIALS") = "./viki-419417-677fe76ddb4a.json"
 
 	logging.info(app.config.get("SQLALCHEMY_DATABASE_URI"))
 	# Initialize extensions
@@ -42,7 +47,7 @@ def create_app():
 	
 	login_manager = LoginManager()
 	login_manager.init_app(app)
-	login_manager.login_view = "login"
+	login_manager.login_view = "google_auth.login"
 	
 	@login_manager.user_loader
 	def load_user(user_id):

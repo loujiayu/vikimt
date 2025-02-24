@@ -16,8 +16,8 @@ def get_chat_history_from_gcs(patient_id):
 				return None
 
 		data = blob.download_as_text()
-		chat_history = json.loads(data)
-		return chat_history
+		# chat_history = json.loads(data)
+		return data
 
 class ChatHistoryResource(Resource):
 	@login_required
