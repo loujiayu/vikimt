@@ -1,4 +1,4 @@
-from flask import Flask
+from flask import Flask, session
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
 from flask_restful import Api
@@ -22,7 +22,7 @@ def create_app():
 	app = Flask(__name__)
 	CORS(app)
 	
-	from app.resources.bucket import ChatHistoryResource
+	from app.resources.chathistory import ChatHistoryResource
 	from app.resources.chat import ChatAPI
 	from app.resources.prompt import PromptResource  # Import PromptResource
 	
@@ -46,20 +46,26 @@ def create_app():
 	
 	from app.oauth import init_oauth
 	from app.models.patient import Patient
+	from app.models.doctor import Doctor
 	init_oauth(app)
 	
 	login_manager = LoginManager()
 	login_manager.init_app(app)
-	login_manager.login_view = "google_auth.login"
-	
+	login_manager.login_view = "auth.login"
+
 	@login_manager.user_loader
 	def load_user(user_id):
-			# Query user by ID and return user object
-			return Patient.query.get(int(user_id))
+			user_type = session.get("role")  # Retrieve user type from session
+
+			if user_type == "patient":
+					return Patient.query.get(int(user_id))
+			elif user_type == "doctor":
+					return Doctor.query.get(int(user_id))
+			
+			return None
 
 	# Register blueprints
-	from app.google_auth import google_auth
-	app.register_blueprint(google_auth, url_prefix="/google")
-	# app.register_blueprint(bucket, url_prefix="/bucket")
+	from app.auth import auth
+	app.register_blueprint(auth)
 	
 	return app
