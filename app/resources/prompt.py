@@ -63,4 +63,4 @@ class PromptResource(Resource):
 	def save_prompt_to_gcs(self, user_type, user_id, prompt_blob, prompt_data):
 		blob_name = f"{user_id}/{prompt_blob}"
 		gcs_service = self.doctor_gcs_service if user_type == UserType.DOCTOR else self.patient_gcs_service
-		gcs_service.upload_text(blob_name, prompt_data)
+		gcs_service.upload_text(prompt_data, blob_name)
