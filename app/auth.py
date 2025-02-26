@@ -43,8 +43,6 @@ def login(provider, role):
 	else:
 		session["role"] = role
 
-	# session["provider"] = provider
-	# session["role"] = role
 	session["cb"] = request.args.get('cb', None)
 
 	if provider == "google":
@@ -102,11 +100,10 @@ def authorize():
 		login_user(user)
 	
 	cb = session["cb"]
-	# return jsonify({"redirect": "success"})
 	return redirect(cb)
 
 @auth.route("/logout")
 @login_required
 def logout():
 	logout_user()
-	return redirect(url_for("auth.home"))
+	return jsonify({"logged_out": True}), 200
