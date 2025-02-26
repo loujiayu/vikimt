@@ -34,6 +34,9 @@ def create_app():
 	# Load configuration
 	from app.config import Config
 	app.config.from_object(Config)
+
+	app.config['SESSION_COOKIE_SAMESITE'] = 'None'  # or 'Strict' or 'None'
+	app.config['SESSION_COOKIE_SECURE'] = True
 	
 	if app.config.get("FLASK_ENV") == "development":
 		logging.info("Running in development mode")
