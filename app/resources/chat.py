@@ -3,6 +3,7 @@ from flask_login import login_user, logout_user, login_required
 from flask import jsonify, request
 from google import genai
 from google.genai import types
+from app.gcs_service import GCSService
 import logging
 
 client = genai.Client(
@@ -28,6 +29,9 @@ def convert_ui_payload_to_contents(ui_payload):
 		return contents
 
 class ChatAPI(Resource):
+	def __init__(self):
+		self.gcs_service = GCSService("patientstorage")
+
 	@login_required
 	def post(self, patient_id):
 		try:
@@ -35,9 +39,17 @@ class ChatAPI(Resource):
 			messages = data.get("messages", [])
 
 			if not messages:
-					return {"error": "No messages provided"}, 400
+				return {"error": "No messages provided"}, 400
 			
-			# # Convert UI payload to Gemini content format
+			# Fetch system_instruction from Google Cloud Storage
+			system_instruction_blob = f"{patient_id}/system_instruction.txt"
+			system_instruction = self.gcs_service.download_text(system_instruction_blob)
+			if not system_instruction:
+				system_instruction = "You are a helpful assistant."
+			
+			logging.info(f"System instruction: {system_instruction}")
+
+			# Convert UI payload to Gemini content format
 			contents = convert_ui_payload_to_contents(messages)
 
 			# Define model and configuration
@@ -52,10 +64,11 @@ class ChatAPI(Resource):
 							types.SafetySetting(category="HARM_CATEGORY_DANGEROUS_CONTENT", threshold="OFF"),
 							types.SafetySetting(category="HARM_CATEGORY_SEXUALLY_EXPLICIT", threshold="OFF"),
 							types.SafetySetting(category="HARM_CATEGORY_HARASSMENT", threshold="OFF"),
-					]
+					],
+					system_instruction=system_instruction  # Add system instruction
 			)
 
-			# # Generate response from Gemini AI
+			# Generate response from Gemini AI
 			response_text = ""
 			logging.info("start generate_content_stream")
 			for chunk in client.models.generate_content_stream(
