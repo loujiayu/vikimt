@@ -32,7 +32,7 @@ class PromptResource(Resource):
 		if not prompt:
 			return {'message': 'No prompt found for this ID.'}, 404
 		
-		return jsonify(prompt)
+		return {'content': prompt}, 200
 	
 	@login_required
 	def post(self, user_id):
@@ -47,10 +47,11 @@ class PromptResource(Resource):
 		
 		# Assuming the prompt data is sent in the request body as JSON
 		prompt_data = request.get_json()
-		if not prompt_data:
-			return {'message': 'No data provided.'}, 400
+		if not prompt_data or 'prompt' not in prompt_data:
+			return {'message': 'No prompt data provided.'}, 400
 		
-		self.save_prompt_to_gcs(user_type, user_id, prompt_blob, prompt_data)
+		prompt_content = prompt_data['prompt']
+		self.save_prompt_to_gcs(user_type, user_id, prompt_blob, prompt_content)
 		return {'message': 'Prompt saved successfully.'}, 201
 
 	def get_prompt_from_gcs(self, user_type, user_id, prompt_blob):

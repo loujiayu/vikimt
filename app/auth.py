@@ -1,7 +1,8 @@
-from flask import Blueprint, redirect, url_for, session, jsonify
+from flask import Blueprint, redirect, url_for, session, jsonify, request
 from app import db
 from app.models.patient import Patient
 from app.models.doctor import Doctor
+from urllib.parse import urlencode
 from flask_login import login_user, logout_user, login_required, current_user
 from app.oauth import google
 import secrets
@@ -17,16 +18,38 @@ def home():
 	return '<a href="/login/google/patient">Login as Patient with Google</a> | ' \
            '<a href="/login/google/doctor">Login as Doctor with Google</a>'
 
+@auth.route("/loginstatus")
+def loginstatus():
+	"""Check if the user is logged in by checking the session."""
+	user = current_user.get_id()
+	if user:
+			return jsonify({"logged_in": True, "user_id": user}), 200
+	return jsonify({"logged_in": False}), 401
+
+@auth.route("/login/", defaults={'provider': None, 'role': None})
 @auth.route("/login/<provider>/<role>")
 def login(provider, role):
 	nonce = secrets.token_urlsafe(16)
 	session["nonce"] = nonce
-	
-	session["provider"] = provider
-	session["role"] = role
+
+	# Use session values if parameters are not provided
+	if provider is None:
+		provider = session.get("provider")
+	else:
+		session["provider"] = provider
+
+	if role is None:
+		role = session.get("role")
+	else:
+		session["role"] = role
+
+	# session["provider"] = provider
+	# session["role"] = role
+	session["cb"] = request.args.get('cb', None)
 
 	if provider == "google":
-		return google.authorize_redirect(url_for("auth.authorize", _external=True), nonce=nonce)
+		url = url_for("auth.authorize", _external=True)
+		return google.authorize_redirect(url, nonce=nonce)
 
 @auth.route("/authorize")
 def authorize():
@@ -78,7 +101,9 @@ def authorize():
 
 		login_user(user)
 	
-	return 'successful'
+	cb = session["cb"]
+	# return jsonify({"redirect": "success"})
+	return redirect(cb)
 
 @auth.route("/logout")
 @login_required

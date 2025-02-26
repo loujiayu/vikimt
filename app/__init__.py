@@ -20,7 +20,7 @@ def create_app():
 	load_dotenv()
 
 	app = Flask(__name__)
-	CORS(app)
+	CORS(app, supports_credentials=True)  # Allow credentials and all origins
 	
 	from app.resources.chathistory import ChatHistoryResource
 	from app.resources.chat import ChatAPI
