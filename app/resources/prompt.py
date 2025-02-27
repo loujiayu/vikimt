@@ -29,8 +29,8 @@ class PromptResource(Resource):
 			return {'message': 'Prompt blob is required.'}, 400
 		
 		prompt = self.get_prompt_from_gcs(user_type, user_id, prompt_blob)
-		if not prompt:
-			return {'message': 'No prompt found for this ID.'}, 404
+		# if not prompt:
+		# 	return {'message': 'No prompt found for this ID.'}, 404
 		
 		return {'content': prompt}, 200
 	
