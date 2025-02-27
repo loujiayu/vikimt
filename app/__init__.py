@@ -31,7 +31,7 @@ def create_app():
 	api.add_resource(ChatAPI, "/chat/<int:patient_id>")
 	api.add_resource(PromptResource, '/prompt/<int:user_id>')  # Update PromptResource
 	api.add_resource(PatientsResource, '/patients')  # Add PatientsResource
-	api.add_resource(ChatHistoryResource, '/chathistory/<string:user_id>')
+	api.add_resource(ChatHistoryResource, '/chat/<string:user_id>/history')
 
 	# Load configuration
 	from app.config import Config
