@@ -8,7 +8,7 @@ from app.ai_services import get_ai_service
 class ChatAPI(Resource):
 	def __init__(self):
 		self.gcs_service = GCSService("patientstorage")
-		self.ai_service = get_ai_service()  # Get default AI service
+		self.ai_service = get_ai_service("medical_lm")  # Get default AI service
 
 	@login_required
 	def post(self, patient_id):
