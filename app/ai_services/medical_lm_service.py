@@ -3,10 +3,11 @@ import json
 from typing import List, Dict, Any, Generator, Optional
 from google import genai
 from google.genai import types
-from app.config import Config
+from flask import current_app
 
 from .base import AIService
 from .config import AI_SERVICE_CONFIG
+from ..utils.mock_data import get_mock_medical_response
 
 class MedicalLMService(AIService):
     """Implementation of AIService for Google's Medical LM models."""
@@ -14,15 +15,19 @@ class MedicalLMService(AIService):
     def __init__(self):
         """Initialize the Medical LM service."""
         config = AI_SERVICE_CONFIG.get("medical_lm", {})
-
-        if app.config.get("FLASK_ENV") == "development":
-          config = AI_SERVICE_CONFIG.get("medical_lm", {})
-
-        self.client = genai.Client(
-            vertexai=True,
-            project=config.get("project"),
-            location=config.get("location"),
-        )
+        
+        # Check if we're in development/local mode
+        self.use_mock = current_app.config.get("FLASK_ENV") == "development" and current_app.config.get("USE_MOCK_AI", True)
+        
+        if not self.use_mock:
+            self.client = genai.Client(
+                vertexai=True,
+                project=config.get("project"),
+                location=config.get("location"),
+            )
+        else:
+            logging.info("Using mock AI responses for Medical LM service")
+            
         self.model_name = config.get("model_name")
         self.config = config
         
@@ -81,6 +86,23 @@ class MedicalLMService(AIService):
                           response_schema: Optional[Dict[str, Any]] = None) -> str:
         """Generate a complete response from the Medical LM model."""
         try:
+            # If using mock responses in local/development environment
+            if self.use_mock:
+                # Extract content from the messages to determine context
+                message_content = "\n".join([msg.get("content", "") for msg in messages])
+                
+                # Determine the type of response needed based on the content and system instruction
+                is_soap_request = "soap" in message_content.lower() or (system_instruction and "soap" in system_instruction.lower())
+                
+                # Get mock response based on the request type
+                mock_response = get_mock_medical_response(
+                    is_soap=is_soap_request,
+                    response_schema=response_schema
+                )
+                
+                return mock_response
+                
+            # Real API call for production
             contents = self._convert_messages_to_contents(messages)
             generate_config = self._create_generate_config(
                 system_instruction,
@@ -105,6 +127,25 @@ class MedicalLMService(AIService):
                         response_schema: Optional[Dict[str, Any]] = None) -> Generator[str, None, None]:
         """Stream the response from the Medical LM model."""
         try:
+            # If using mock responses in local/development environment
+            if self.use_mock:
+                # Get full mock response
+                message_content = "\n".join([msg.get("content", "") for msg in messages])
+                is_soap_request = "soap" in message_content.lower() or (system_instruction and "soap" in system_instruction.lower())
+                mock_response = get_mock_medical_response(
+                    is_soap=is_soap_request,
+                    response_schema=response_schema
+                )
+                
+                # Split into chunks to simulate streaming
+                chunk_size = 20  # characters per chunk
+                for i in range(0, len(mock_response), chunk_size):
+                    yield mock_response[i:i+chunk_size]
+                    import time
+                    time.sleep(0.1)  # Simulate delay between chunks
+                return
+            
+            # Real API streaming for production    
             contents = self._convert_messages_to_contents(messages)
             generate_config = self._create_generate_config(
                 system_instruction,

@@ -71,11 +71,10 @@ class AIResource(Resource):
         """
         try:
             # If no doctor_id is provided, use the current doctor's ID
-            if doctor_id is None:
-                if hasattr(current_user, 'doctor_id'):
-                    doctor_id = current_user.doctor_id
-                else:
-                    return {"error": "No doctor ID available"}, 400
+            if hasattr(current_user, 'doctor_id'):
+                doctor_id = current_user.doctor_id
+            else:
+                return {"error": "No doctor ID available"}, 400
             
             # Ensure patient_id is provided
             if patient_id is None:
@@ -103,15 +102,8 @@ class AIResource(Resource):
             # Generate SOAP notes with the AI service
             soap_notes = self.ai_service.generate_response(messages, system_instruction)
             
-            # Save to blob storage
-            blob_name = f"{doctor_id}/soap_notes/{patient_id}"
-            self.doctor_gcs_service.upload_text(soap_notes, blob_name)
-            
             return {
-                "message": "SOAP notes generated and saved successfully", 
-                "soap_notes": soap_notes,
-                "patient_id": patient_id,
-                "doctor_id": doctor_id
+                "content": soap_notes,
             }, 201
             
         except Exception as e:

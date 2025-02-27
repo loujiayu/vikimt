@@ -18,8 +18,11 @@ class Config:
 	if FLASK_ENV == "development":
 		SQLALCHEMY_DATABASE_URI = f"postgresql://{DB_USER}:{DB_PASSWORD}@{DB_SERVER}:{DB_PORT}/{DB_NAME}"
 		# GOOGLE_APPLICATION_CREDENTIALS = os.getenv("GOOGLE_APPLICATION_CREDENTIALS", "./viki-419417-677fe76ddb4a.json")
+		USE_MOCK_AI = os.getenv("USE_MOCK_AI", "True").lower() == "true"
 	else:
 		SQLALCHEMY_DATABASE_URI = f"postgresql://{DB_USER}:{DB_PASSWORD}@/{DB_NAME}?host=/cloudsql/{INSTANCE_CONNECTION_NAME}"
+		USE_MOCK_AI = False
+	
 	# SQLALCHEMY_DATABASE_URI = f"mssql+pyodbc://{DB_USER}:{DB_PASSWORD}@{DB_SERVER}/{DB_NAME}?driver=ODBC+Driver+17+for+SQL+Server"
 	SQLALCHEMY_TRACK_MODIFICATIONS = False
 
