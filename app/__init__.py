@@ -25,11 +25,13 @@ def create_app():
 	from app.resources.chathistory import ChatHistoryResource
 	from app.resources.chat import ChatAPI
 	from app.resources.prompt import PromptResource  # Import PromptResource
+	from app.resources.patients import PatientsResource  # Import PatientsResource
 	
 	api = Api(app)
 	api.add_resource(ChatHistoryResource, '/chathistory/<int:patient_id>')
 	api.add_resource(ChatAPI, "/chat/<int:patient_id>")
 	api.add_resource(PromptResource, '/prompt/<int:user_id>')  # Update PromptResource
+	api.add_resource(PatientsResource, '/patients')  # Add PatientsResource
 
 	# Load configuration
 	from app.config import Config
