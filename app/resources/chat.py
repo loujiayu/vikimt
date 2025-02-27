@@ -79,7 +79,7 @@ class ChatAPI(Resource):
 				logging.info(chunk.text)
 				response_text += chunk.text
 
-			return jsonify({"response": response_text})
+			return jsonify({"message": response_text}), 200
 
 		except Exception as e:
 				return {"error": str(e)}, 500
