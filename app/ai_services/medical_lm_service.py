@@ -73,7 +73,9 @@ class MedicalLMService(AIService):
         # Add response_mime_type if provided
         if response_mime_type:
             config_params["response_mime_type"] = response_mime_type
-        
+        else:
+            config_params["response_mime_type"] = "text/plain"
+
         # Add response_schema if provided
         if response_schema:
             config_params["response_schema"] = response_schema

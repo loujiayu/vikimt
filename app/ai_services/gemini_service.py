@@ -63,6 +63,8 @@ class GeminiAIService(AIService):
         # Add response_mime_type if provided
         if response_mime_type:
             config_params["response_mime_type"] = response_mime_type
+        else:
+            config_params["response_mime_type"] = "text/plain"
         
         # Add response_schema if provided - directly use the schema parameter
         if response_schema:
