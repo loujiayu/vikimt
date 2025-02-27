@@ -23,15 +23,20 @@ def create_app():
 	CORS(app, supports_credentials=True)  # Allow credentials and all origins
 	
 	from app.resources.chat import ChatAPI
-	from app.resources.prompt import PromptResource  # Import PromptResource
-	from app.resources.patients import PatientsResource  # Import PatientsResource
+	from app.resources.prompt import PromptResource
+	from app.resources.patients import PatientsResource
 	from app.resources.chat_history import ChatHistoryResource
+	from app.resources.doctor_resource import DoctorResource
 
 	api = Api(app)
 	api.add_resource(ChatAPI, "/chat/<int:patient_id>")
-	api.add_resource(PromptResource, '/prompt/<int:user_id>')  # Update PromptResource
-	api.add_resource(PatientsResource, '/patients')  # Add PatientsResource
+	api.add_resource(PromptResource, '/prompt/<int:user_id>')
+	api.add_resource(PatientsResource, '/patients')
 	api.add_resource(ChatHistoryResource, '/chat/<string:user_id>/history')
+	
+	# Add new doctor endpoints
+	api.add_resource(DoctorResource, 
+	                '/doctors/<int:doctor_id>')  # Get doctor by ID
 
 	# Load configuration
 	from app.config import Config

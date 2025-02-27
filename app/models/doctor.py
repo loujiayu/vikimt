@@ -15,3 +15,14 @@ class Doctor(UserMixin, db.Model):
 	
 	def get_id(self):
 		return self.doctor_id
+		
+	def to_dict(self):
+		"""Convert doctor model to dictionary for API responses"""
+		return {
+			'doctor_id': self.doctor_id,
+			'full_name': self.full_name,
+			'email': self.email,
+			'sso_provider': self.sso_provider,
+			'created_at': self.created_at.isoformat() if self.created_at else None,
+			'updated_at': self.updated_at.isoformat() if self.updated_at else None
+		}
