@@ -18,6 +18,7 @@ class PatientsResource(Resource):
                     'patient_id': patient.patient_id,
                     'full_name': patient.full_name,
                     'email': patient.email,
+                    'metadata': patient.patient_metadata,
                     'created_at': patient.created_at.isoformat() if patient.created_at else None,
                     'updated_at': patient.updated_at.isoformat() if patient.updated_at else None
                 })
