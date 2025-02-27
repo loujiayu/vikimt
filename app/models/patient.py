@@ -10,8 +10,7 @@ class Patient(UserMixin, db.Model):
 	full_name = db.Column(db.String(255), nullable=True)
 	sso_provider = db.Column(db.String(50), nullable=True)
 	sso_user_id = db.Column(db.String(255), unique=True, nullable=True)
-	chat_history = db.Column(db.Text, nullable=True)  
-	prompts = db.Column(db.Text, nullable=True)  
+	patient_metadata = db.Column(db.JSON, nullable=True)
 	created_at = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
 	updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow, nullable=False)
 	

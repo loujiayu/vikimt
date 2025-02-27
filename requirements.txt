@@ -13,3 +13,4 @@ Flask-RESTful
 Flask-Login
 flask_cors
 google-genai
+flask-migrate

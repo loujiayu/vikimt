@@ -6,7 +6,7 @@ class Config:
 	if os.getenv("DB_SERVER") == "127.0.0.1":
 		print("🔹 Using Cloud SQL Proxy for local development.")  
 
-	FLASK_ENV = os.getenv("FLASK_ENV", "production")
+	FLASK_ENV = os.getenv("FLASK_ENV", "development")
 	# SQL Server Configuration
 	DB_SERVER = os.getenv("DB_SERVER", "127.0.0.1")
 	DB_NAME = os.getenv("DB_NAME")
