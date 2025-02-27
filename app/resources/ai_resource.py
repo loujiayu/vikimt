@@ -96,8 +96,12 @@ class AIResource(Resource):
                 )
             
             # Create message with chat history
-            prompt = f"Generate SOAP notes based on this patient chat history:\n\n{chat_history}"
+            prompt = f"{chat_history}"
             messages = [{"type": "user", "content": prompt}]
+            
+            # Log prompt and system instruction for debugging
+            logging.info(f"System instruction for patient {patient_id}: {system_instruction}")
+            logging.info(f"Prompt for patient {patient_id}: {prompt}")
             
             # Generate SOAP notes with the AI service
             soap_notes = self.ai_service.generate_response(messages, system_instruction)
