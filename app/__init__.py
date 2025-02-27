@@ -27,6 +27,7 @@ def create_app():
 	from app.resources.patients import PatientsResource
 	from app.resources.chat_history import ChatHistoryResource
 	from app.resources.doctor_resource import DoctorResource
+	from app.resources.ai_resource import AIResource
 
 	api = Api(app)
 	api.add_resource(ChatAPI, "/chat/<int:patient_id>")
@@ -37,6 +38,10 @@ def create_app():
 	# Add new doctor endpoints
 	api.add_resource(DoctorResource, 
 	                '/doctors/<int:doctor_id>')  # Get doctor by ID
+	
+	# Add AI endpoints for SOAP notes and patient history
+	api.add_resource(AIResource, 
+	                '/patients/<int:patient_id>/soap')  # Generate SOAP notes for a specific patient
 
 	# Load configuration
 	from app.config import Config
