@@ -3,6 +3,7 @@ import json
 from typing import List, Dict, Any, Generator, Optional
 from google import genai
 from google.genai import types
+from app.config import Config
 
 from .base import AIService
 from .config import AI_SERVICE_CONFIG
@@ -13,6 +14,10 @@ class MedicalLMService(AIService):
     def __init__(self):
         """Initialize the Medical LM service."""
         config = AI_SERVICE_CONFIG.get("medical_lm", {})
+
+        if app.config.get("FLASK_ENV") == "development":
+          config = AI_SERVICE_CONFIG.get("medical_lm", {})
+
         self.client = genai.Client(
             vertexai=True,
             project=config.get("project"),
