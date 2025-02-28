@@ -1,5 +1,6 @@
 import json
 import random
+import logging
 from datetime import datetime, timedelta
 
 def get_mock_medical_response(is_soap=False, response_schema=None) -> str:
@@ -356,10 +357,14 @@ General: {general_appearance}
 
 def get_mock_structured_response(schema):
     """Generate mock structured response based on schema"""
-    # Generate a response that matches the provided schema
     try:
-        result = {}
+        # Check if this is a SOAP schema (has subjective, objective, assessment, plan properties)
         properties = schema.get("properties", {})
+        if all(key in properties for key in ["subjective", "objective", "assessment", "plan"]):
+            return get_mock_structured_soap_response()
+            
+        # Handle other schema types
+        result = {}
         
         # Handle risk assessment schema
         if "Risk" in properties:
@@ -387,6 +392,37 @@ def get_mock_structured_response(schema):
     except Exception as e:
         logging.error(f"Error generating mock structured response: {str(e)}")
         return json.dumps({"Error": "Failed to generate mock response"})
+
+def get_mock_structured_soap_response():
+    """Generate a structured SOAP response with arrays for each section"""
+    # Generate a structured SOAP response
+    soap_data = {
+        "subjective": [
+            f"Patient reports {random.choice(['headache', 'cough', 'fever', 'fatigue', 'back pain'])} for {random.randint(1, 10)} days.",
+            f"Describes pain as {random.choice(['sharp', 'dull', 'throbbing', 'constant', 'intermittent'])}.",
+            f"{random.choice(['No', 'Has'])} history of similar symptoms.",
+            f"Currently taking {random.choice(['no medications', 'acetaminophen for pain', 'ibuprofen as needed', 'prescribed medications'])}."
+        ],
+        "objective": [
+            f"Vital signs: BP {random.randint(110, 140)}/{random.randint(70, 90)}, HR {random.randint(60, 100)}, Temp {round(random.uniform(97.6, 102.5), 1)}°F, RR {random.randint(12, 20)}.",
+            f"{random.choice(['Alert and oriented x3', 'Appears in mild distress', 'Well-appearing', 'Visibly uncomfortable'])}.",
+            f"Physical exam: {random.choice(['Normal findings', 'Tenderness to palpation', 'Limited range of motion', 'Erythema noted', 'Auscultation reveals clear lungs'])}.",
+            f"Labs: {random.choice(['WBC elevated at 12.3', 'CBC within normal limits', 'Pending', 'Not ordered'])}"
+        ],
+        "assessment": [
+            f"{random.choice(['Acute upper respiratory infection', 'Migraine headache', 'Low back strain', 'Anxiety disorder', 'Gastroenteritis'])}.",
+            f"{random.choice(['Likely viral in origin', 'Possibly aggravated by stress', 'Due to mechanical factors', 'Responding to current therapy'])}.",
+            f"Differential includes {random.choice(['bacterial infection', 'tension headache', 'muscle spasm', 'panic attack', 'gastritis'])}."
+        ],
+        "plan": [
+            f"{random.choice(['Rest and hydration', 'Continue current medications', 'Start new prescription', 'Physical therapy', 'Referral to specialist'])}.",
+            f"Follow up in {random.choice(['1 week', '2 weeks', '1 month', '3 days if symptoms worsen'])}.",
+            f"{random.choice(['Ordered lab tests', 'Scheduled imaging', 'Provided patient education', 'Recommended lifestyle modifications'])}.",
+            f"Return precautions discussed."
+        ]
+    }
+    
+    return json.dumps(soap_data, indent=2)
 
 def get_mock_general_response():
     """Generate a general mock response"""

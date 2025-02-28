@@ -7,7 +7,7 @@ from flask import current_app
 
 from .base import AIService
 from .config import AI_SERVICE_CONFIG
-from ..utils.mock_data import get_mock_medical_response
+from ..utils.mock_data import get_mock_medical_response, get_mock_structured_response
 
 class MedicalLMService(AIService):
     """Implementation of AIService for Google's Medical LM models."""
@@ -90,16 +90,19 @@ class MedicalLMService(AIService):
         try:
             # If using mock responses in local/development environment
             if self.use_mock:
+                # Check if we have a schema (structured response requested)
+                if response_schema:
+                    return get_mock_structured_response(response_schema)
+                    
                 # Extract content from the messages to determine context
                 message_content = "\n".join([msg.get("content", "") for msg in messages])
                 
-                # Determine the type of response needed based on the content and system instruction
+                # Determine if SOAP format is needed
                 is_soap_request = "soap" in message_content.lower() or (system_instruction and "soap" in system_instruction.lower())
                 
                 # Get mock response based on the request type
                 mock_response = get_mock_medical_response(
-                    is_soap=is_soap_request,
-                    response_schema=response_schema
+                    is_soap=is_soap_request
                 )
                 
                 return mock_response

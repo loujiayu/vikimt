@@ -42,6 +42,11 @@ def create_app():
 	# Add AI endpoints for SOAP notes and patient history
 	api.add_resource(AIResource, 
 	                '/patients/<int:patient_id>/soap')  # Generate SOAP notes for a specific patient
+	
+	# Add new endpoint for DVX (Differential Diagnosis AI)
+	api.add_resource(AIResource, 
+	                '/patients/<int:patient_id>/dvx', 
+	                endpoint='dvx')  # Generate differential diagnosis for a specific patient
 
 	# Load configuration
 	from app.config import Config
