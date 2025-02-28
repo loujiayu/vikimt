@@ -363,6 +363,10 @@ def get_mock_structured_response(schema):
         if all(key in properties for key in ["subjective", "objective", "assessment", "plan"]):
             return get_mock_structured_soap_response()
             
+        # Check if this is a differential diagnosis array schema
+        if schema.get("type") == "ARRAY" and schema.get("items", {}).get("properties", {}).get("condition"):
+            return get_mock_structured_differential_diagnosis()
+            
         # Handle other schema types
         result = {}
         
@@ -423,6 +427,116 @@ def get_mock_structured_soap_response():
     }
     
     return json.dumps(soap_data, indent=2)
+
+def get_mock_structured_differential_diagnosis():
+    """Generate a structured differential diagnosis response"""
+    # Common conditions based on typical symptoms
+    conditions = [
+        {
+            "name": "Upper Respiratory Infection",
+            "risk_options": ["Low", "Moderate"],
+            "confidence_range": (60, 90),
+            "steps_options": [
+                "Recommend symptomatic treatment with rest and hydration",
+                "Advise over-the-counter pain relievers as needed for discomfort",
+                "Follow up in 7-10 days if symptoms persist or worsen"
+            ]
+        },
+        {
+            "name": "Community-Acquired Pneumonia",
+            "risk_options": ["Moderate"],
+            "confidence_range": (40, 75),
+            "steps_options": [
+                "Order chest X-ray to confirm diagnosis",
+                "Consider empiric antibiotic therapy with amoxicillin or doxycycline",
+                "Assess oxygen saturation and consider supplemental oxygen if below 94%"
+            ]
+        },
+        {
+            "name": "Acute Bronchitis",
+            "risk_options": ["Low", "Moderate"],
+            "confidence_range": (50, 80),
+            "steps_options": [
+                "Recommend rest and increased fluid intake",
+                "Consider bronchodilators if wheezing is present",
+                "Educate on expected duration of cough (2-3 weeks)"
+            ]
+        },
+        {
+            "name": "Anxiety Disorder",
+            "risk_options": ["Low", "Moderate"],
+            "confidence_range": (40, 85),
+            "steps_options": [
+                "Administer GAD-7 screening tool",
+                "Consider referral to mental health services",
+                "Discuss stress management techniques and lifestyle modifications"
+            ]
+        },
+        {
+            "name": "Gastroesophageal Reflux Disease",
+            "risk_options": ["Low"],
+            "confidence_range": (55, 85),
+            "steps_options": [
+                "Recommend dietary modifications (avoid triggers, smaller meals)",
+                "Trial of proton pump inhibitors for 2 weeks",
+                "Elevate head of bed and avoid eating within 3 hours of bedtime"
+            ]
+        },
+        {
+            "name": "Acute Coronary Syndrome",
+            "risk_options": ["Critical"],
+            "confidence_range": (20, 60),
+            "steps_options": [
+                "Immediate ECG and cardiac enzyme testing",
+                "Administer aspirin if not contraindicated",
+                "Urgent cardiology consultation"
+            ]
+        },
+        {
+            "name": "Migraine",
+            "risk_options": ["Low", "Moderate"],
+            "confidence_range": (50, 90),
+            "steps_options": [
+                "Trial of sumatriptan or other triptan medication for acute relief",
+                "Maintain headache diary to identify triggers",
+                "Consider prophylactic therapy if episodes occur >4 times monthly"
+            ]
+        },
+        {
+            "name": "Viral Gastroenteritis",
+            "risk_options": ["Low", "Moderate"],
+            "confidence_range": (60, 95),
+            "steps_options": [
+                "Focus on oral rehydration therapy",
+                "Monitor for signs of dehydration",
+                "Symptomatic treatment with antiemetics if needed"
+            ]
+        }
+    ]
+    
+    # Select 3-5 random conditions for the differential
+    num_diagnoses = random.randint(3, 5)
+    selected_conditions = random.sample(conditions, num_diagnoses)
+    
+    # Sort by confidence (descending)
+    for condition in selected_conditions:
+        condition["confidence"] = random.randint(condition["confidence_range"][0], condition["confidence_range"][1])
+    
+    selected_conditions.sort(key=lambda x: x["confidence"], reverse=True)
+    
+    # Format the response according to schema
+    differential_diagnosis = []
+    
+    for condition in selected_conditions:
+        diagnosis = {
+            "condition": condition["name"],
+            "risk": random.choice(condition["risk_options"]),
+            "confidence": condition["confidence"],
+            "steps": random.choice(condition["steps_options"])
+        }
+        differential_diagnosis.append(diagnosis)
+    
+    return json.dumps(differential_diagnosis, indent=2)
 
 def get_mock_general_response():
     """Generate a general mock response"""

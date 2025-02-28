@@ -5,16 +5,18 @@ from app.decorators import doctor_required
 from app.gcs_service import GCSService
 from app.ai_services import get_ai_service
 import logging
+import json
 
 class AIResource(Resource):
     PATIENT_GCS_BUCKET_NAME = "patientstorage"
     DOCTOR_GCS_BUCKET_NAME = "doctorstorage"
     
-    def __init__(self):
+    def __init__(self, method_type='soap'):
         self.patient_gcs_service = GCSService(self.PATIENT_GCS_BUCKET_NAME)
         self.doctor_gcs_service = GCSService(self.DOCTOR_GCS_BUCKET_NAME)
-        self.ai_service = get_ai_service("medical_lm")  # Use medical LM for healthcare-specific content
-
+        self.ai_service = get_ai_service("medical_lm")
+        self.method_type = method_type  # Store the method type ('soap' or 'dvx')
+    
     def get_soap_prompt(self, doctor_id):
         """
         Retrieve SOAP prompt from blob storage for a specific doctor.
@@ -85,12 +87,18 @@ class AIResource(Resource):
     @doctor_required
     def post(self, patient_id=None):
         """
-        Generate SOAP notes using AI based on a patient's chat history.
-        
-        Args:
-            doctor_id: The ID of the doctor (optional, uses current doctor if not provided)
-            patient_id: The ID of the patient whose chat history to use
+        Route handler that delegates to the appropriate method based on endpoint type.
         """
+        # Delegate to the appropriate method based on the method_type
+        if self.method_type == 'soap':
+            return self.generate_soap_notes(patient_id)
+        elif self.method_type == 'dvx':
+            return self.generate_differential_diagnosis(patient_id)
+        else:
+            return {"error": f"Unknown method type: {self.method_type}"}, 400
+    
+    def generate_soap_notes(self, patient_id=None):
+        """Generate SOAP notes using AI based on a patient's chat history."""
         try:
             # If no doctor_id is provided, use the current doctor's ID
             if hasattr(current_user, 'doctor_id'):
@@ -158,23 +166,15 @@ class AIResource(Resource):
             )
             
             return {
-                "content": soap_notes,
+                "content": json.loads(soap_notes),
             }, 201
             
         except Exception as e:
             logging.error(f"Error generating SOAP notes: {str(e)}")
             return {"error": "Failed to generate SOAP notes"}, 500
 
-    @login_required
-    @doctor_required
-    def post_dvx(self, patient_id=None):
-        """
-        Generate differential diagnosis using DVX AI based on a patient's chat history.
-        
-        Args:
-            doctor_id: The ID of the doctor (optional, uses current doctor if not provided)
-            patient_id: The ID of the patient whose chat history to use
-        """
+    def generate_differential_diagnosis(self, patient_id=None):
+        """Generate differential diagnosis using AI based on a patient's chat history."""
         try:
             # If no doctor_id is provided, use the current doctor's ID
             if hasattr(current_user, 'doctor_id'):
@@ -197,27 +197,63 @@ class AIResource(Resource):
                 # Use default system instruction if no custom prompt exists
                 system_instruction = (
                     "You are a differential diagnosis assistant helping to analyze patient symptoms. "
-                    "Based on the conversation history, provide a structured differential diagnosis "
-                    "with probabilities, supporting evidence, and contradicting evidence for each possible diagnosis. "
-                    "Include recommended tests or follow-up actions."
+                    "Based on the conversation history, generate a list of possible diagnoses with "
+                    "risk levels, confidence percentages, and recommended next steps for each condition."
                 )
             
             # Create message with chat history
             prompt = f"{chat_history}"
             messages = [{"type": "user", "content": prompt}]
             
+            # Define structured response schema for differential diagnosis
+            response_schema = {
+                "type": "ARRAY",
+                "items": {
+                    "type": "OBJECT",
+                    "required": [
+                        "condition",
+                        "risk",
+                        "confidence",
+                        "steps"
+                    ],
+                    "properties": {
+                        "condition": {
+                            "type": "STRING"
+                        },
+                        "risk": {
+                            "type": "STRING",
+                            "enum": [
+                                "Low",
+                                "Moderate",
+                                "Critical"
+                            ]
+                        },
+                        "confidence": {
+                            "type": "INTEGER",
+                            "minimum": 0,
+                            "maximum": 100
+                        },
+                        "steps": {
+                            "type": "STRING"
+                        }
+                    }
+                }
+            }
+            
             # Log prompt and system instruction for debugging
             logging.info(f"DVX System instruction for patient {patient_id}: {system_instruction}")
             logging.info(f"DVX Prompt for patient {patient_id}: {prompt}")
             
-            # Initialize the DVX service
-            dvx_service = get_ai_service("dvx")
-            
-            # Generate differential diagnosis with the DVX service
-            differential_diagnosis = dvx_service.generate_response(messages, system_instruction)
+            # Use the existing medical_lm_service for differential diagnosis
+            differential_diagnosis = self.ai_service.generate_response(
+                messages, 
+                system_instruction,
+                response_mime_type="application/json",
+                response_schema=response_schema
+            )
             
             return {
-                "content": differential_diagnosis,
+                "content": json.loads(differential_diagnosis),
             }, 201
             
         except Exception as e:

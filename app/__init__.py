@@ -39,14 +39,16 @@ def create_app():
 	api.add_resource(DoctorResource, 
 	                '/doctors/<int:doctor_id>')  # Get doctor by ID
 	
-	# Add AI endpoints for SOAP notes and patient history
+	# Add AI endpoints for SOAP notes and DVX
 	api.add_resource(AIResource, 
-	                '/patients/<int:patient_id>/soap')  # Generate SOAP notes for a specific patient
+	                '/patients/<int:patient_id>/soap',
+	                endpoint='soap',
+	                resource_class_kwargs={'method_type': 'soap'})  # Generate SOAP notes
 	
-	# Add new endpoint for DVX (Differential Diagnosis AI)
 	api.add_resource(AIResource, 
 	                '/patients/<int:patient_id>/dvx', 
-	                endpoint='dvx')  # Generate differential diagnosis for a specific patient
+	                endpoint='dvx',
+	                resource_class_kwargs={'method_type': 'dvx'})  # Generate differential diagnosis
 
 	# Load configuration
 	from app.config import Config
